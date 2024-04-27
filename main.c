@@ -1,5 +1,10 @@
 #include "grug.h"
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 static void error_handler(char *error_msg, char *filename, int line_number) {
 	fprintf(stderr, "%s in %s:%d\n", error_msg, filename, line_number);
 	exit(EXIT_FAILURE);
@@ -13,6 +18,8 @@ int main() {
 
 		for (size_t reload_index = 0; reload_index < reloads_size; reload_index++) {
 			reload reload = reloads[reload_index];
+
+			(void)reload;
 
 			// TODO: Use
 			// for (size_t i = 0; i < 2; i++) {

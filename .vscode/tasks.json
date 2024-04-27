@@ -8,8 +8,6 @@
       "args": [
         "main.c",
         "grug/grug.c",
-        "data.c",
-        "game/human.c",
         "-Wall",
         "-Wextra",
         "-Werror",
@@ -49,8 +47,6 @@
       "args": [
         "main.c",
         "grug/grug.c",
-        "data.c",
-        "game/human.c",
         "-Wall",
         "-Wextra",
         "-Werror",
