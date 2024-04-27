@@ -1,4 +1,4 @@
-define_human() human {
+define() human {
     return {
         .placeholder = 0,
     }
@@ -6,10 +6,10 @@ define_human() human {
 
 i: i64 = 0
 
-on_human_increment(self: human) {
+on_increment(self: human) {
     i = i + 1
 }
 
-on_human_print(self: human) {
+on_print(self: human) {
     printf("i: %d\n", i)
 }

@@ -1,6 +1,10 @@
+// Solely so stupid VS Code can find "CLOCK_PROCESS_CPUTIME_ID"
+#define _POSIX_C_SOURCE 199309L
+
 #include "grug.h"
 #include "mod.h"
 
+#include <dlfcn.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,48 +13,6 @@
 
 static double get_timespec_diff(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
-}
-
-static typeof(define_human) *get_define_human_fn(void *dll) {
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "define_human");
-	#pragma GCC diagnostic pop
-}
-
-static typeof(on_human_increment) *get_on_human_increment_fn(void *dll) {
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_human_increment");
-	#pragma GCC diagnostic pop
-}
-
-static typeof(on_human_print) *get_on_human_print_fn(void *dll) {
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_human_print");
-	#pragma GCC diagnostic pop
-}
-
-static typeof(define_gun) *get_define_gun_fn(void *dll) {
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "define_gun");
-	#pragma GCC diagnostic pop
-}
-
-static typeof(on_gun_increment) *get_on_gun_increment_fn(void *dll) {
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_gun_increment");
-	#pragma GCC diagnostic pop
-}
-
-static typeof(on_gun_print) *get_on_gun_print_fn(void *dll) {
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_gun_print");
-	#pragma GCC diagnostic pop
 }
 
 static grug_file get_grug_file(char *name) {
@@ -69,31 +31,26 @@ void test_1B_human_fns_cached(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
-	human human = define_fn();
+	human human = *(struct human *)file.define;
 
-	human_fns vt = {
-		.on_human_increment = get_on_human_increment_fn(file.dll),
-		.on_human_print = get_on_human_print_fn(file.dll),
-	};
-	human.fns = &vt;
+	human.on_fns = file.on_fns;
 
-	typeof(on_human_increment) *increment_fn = human.fns->on_human_increment;
+	typeof(on_human_increment) *increment = human.on_fns->on_increment;
 
 	// Running
-	human.fns->on_human_print(globals, human);
+	human.on_fns->on_print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		increment_fn(globals, human);
+		increment(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	human.fns->on_human_print(globals, human);
+	human.on_fns->on_print(globals, human);
 
 	printf("test_1B_human_fns_cached took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -107,29 +64,24 @@ void test_1B_human_fns(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
-	human human = define_fn();
+	human human = *(struct human *)file.define;
 
-	human_fns fns = {
-		.on_human_increment = get_on_human_increment_fn(file.dll),
-		.on_human_print = get_on_human_print_fn(file.dll),
-	};
-	human.fns = &fns;
+	human.on_fns = file.on_fns;
 
 	// Running
-	human.fns->on_human_print(globals, human);
+	human.on_fns->on_print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		human.fns->on_human_increment(globals, human);
+		human.on_fns->on_increment(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	human.fns->on_human_print(globals, human);
+	human.on_fns->on_print(globals, human);
 
 	printf("test_1B_human_fns took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -143,26 +95,27 @@ void test_1B_human_fns_pointer_slowdown(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
-	human human = define_fn();
+	human human = *(struct human *)file.define;
 
-	typeof(on_human_increment) *on_human_increment_fn = get_on_human_increment_fn(file.dll);
-	typeof(on_human_print) *on_human_print_fn = get_on_human_print_fn(file.dll);
+	human_on_fns *on_fns = file.on_fns;
+
+	typeof(on_human_increment) *increment = on_fns->on_increment;
+	typeof(on_human_print) *print = on_fns->on_print;
 
 	// Running
-	on_human_print_fn(globals, human);
+	print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_human_increment_fn(globals, human);
+		increment(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_human_print_fn(globals, human);
+	print(globals, human);
 
 	printf("test_1B_human_fns_pointer_slowdown took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -176,27 +129,31 @@ void test_100M_dlsym(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_gun) *define_fn = get_define_gun_fn(file.dll);
-	gun gun = define_fn();
+	gun gun = *(struct gun *)file.define;
 
-	typeof(on_gun_print) *on_gun_print_fn = get_on_gun_print_fn(file.dll);
+	gun_on_fns *on_fns = file.on_fns;
+
+	typeof(on_gun_print) *print = on_fns->on_print;
 
 	// Running
-	on_gun_print_fn(globals, gun);
+	print(globals, gun);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 100000000; i++) {
-		typeof(on_gun_increment) *on_gun_increment_fn = get_on_gun_increment_fn(file.dll);
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wpedantic"
+		typeof(on_gun_increment) *increment = dlsym(file.dll, "on_increment");
+		#pragma GCC diagnostic pop
 
-		on_gun_increment_fn(globals, gun);
+		increment(globals, gun);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_gun_print_fn(globals, gun);
+	print(globals, gun);
 
 	printf("test_100M_dlsym took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -210,26 +167,27 @@ void test_1B_regular(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_gun) *define_fn = get_define_gun_fn(file.dll);
-	gun gun = define_fn();
+	gun gun = *(struct gun *)file.define;
 
-	typeof(on_gun_increment) *on_gun_increment_fn = get_on_gun_increment_fn(file.dll);
-	typeof(on_gun_print) *on_gun_print_fn = get_on_gun_print_fn(file.dll);
+	gun_on_fns *on_fns = file.on_fns;
+
+	typeof(on_gun_increment) *increment = on_fns->on_increment;
+	typeof(on_gun_print) *print = on_fns->on_print;
 
 	// Running
-	on_gun_print_fn(globals, gun);
+	print(globals, gun);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_gun_increment_fn(globals, gun);
+		increment(globals, gun);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_gun_print_fn(globals, gun);
+	print(globals, gun);
 
 	printf("test_1B_regular took %.2f seconds\n", get_timespec_diff(start, end));
 
