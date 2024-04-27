@@ -1,0 +1,15 @@
+define_entity() entity {
+    return {
+        .placeholder = 0,
+    }
+}
+
+i: i64 = 0
+
+on_increment(self: entity) {
+    i = i + 1
+}
+
+on_print(self: entity) {
+    printf("i: %d\n", i)
+}
