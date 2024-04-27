@@ -14,7 +14,7 @@ typedef int8_t i8;
 typedef struct about about;
 typedef struct gun gun;
 typedef struct human human;
-typedef struct fn_table fn_table;
+typedef struct human_fns human_fns;
 
 gun define_gun(void);
 void on_gun_increment(void *globals, gun self);
@@ -36,10 +36,10 @@ struct gun {
 
 struct human {
 	i8 placeholder;
-	fn_table *fn_table;
+	human_fns *fns;
 };
 
-struct fn_table {
+struct human_fns {
 	typeof(on_human_increment) *on_human_increment;
 	typeof(on_human_print) *on_human_print;
 };

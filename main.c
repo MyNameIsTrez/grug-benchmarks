@@ -62,7 +62,7 @@ static grug_file get_grug_file(char *name) {
 	abort();
 }
 
-void test_1B_fn_table_cached(void) {
+void test_1B_human_fns_cached(void) {
 	// Setup
 	grug_file file = get_grug_file("human.grug");
 
@@ -70,37 +70,37 @@ void test_1B_fn_table_cached(void) {
 	file.init_globals_struct_fn(globals);
 
 	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
-	human e = define_fn();
+	human human = define_fn();
 
-	fn_table vt = {
+	human_fns vt = {
 		.on_human_increment = get_on_human_increment_fn(file.dll),
 		.on_human_print = get_on_human_print_fn(file.dll),
 	};
-	e.fn_table = &vt;
+	human.fns = &vt;
 
-	typeof(on_human_increment) *increment_fn = e.fn_table->on_human_increment;
+	typeof(on_human_increment) *increment_fn = human.fns->on_human_increment;
 
 	// Running
-	e.fn_table->on_human_print(globals, e);
+	human.fns->on_human_print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		increment_fn(globals, e);
+		increment_fn(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	e.fn_table->on_human_print(globals, e);
+	human.fns->on_human_print(globals, human);
 
-	printf("test_1B_fn_table_cached took %.2f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_human_fns_cached took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
 
-void test_1B_fn_table(void) {
+void test_1B_human_fns(void) {
 	// Setup
 	grug_file file = get_grug_file("human.grug");
 
@@ -108,35 +108,35 @@ void test_1B_fn_table(void) {
 	file.init_globals_struct_fn(globals);
 
 	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
-	human e = define_fn();
+	human human = define_fn();
 
-	fn_table vt = {
+	human_fns fns = {
 		.on_human_increment = get_on_human_increment_fn(file.dll),
 		.on_human_print = get_on_human_print_fn(file.dll),
 	};
-	e.fn_table = &vt;
+	human.fns = &fns;
 
 	// Running
-	e.fn_table->on_human_print(globals, e);
+	human.fns->on_human_print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		e.fn_table->on_human_increment(globals, e);
+		human.fns->on_human_increment(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	e.fn_table->on_human_print(globals, e);
+	human.fns->on_human_print(globals, human);
 
-	printf("test_1B_fn_table took %.2f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_human_fns took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
 
-void test_1B_fn_table_pointer_slowdown(void) {
+void test_1B_human_fns_pointer_slowdown(void) {
 	// Setup
 	grug_file file = get_grug_file("human.grug");
 
@@ -144,27 +144,27 @@ void test_1B_fn_table_pointer_slowdown(void) {
 	file.init_globals_struct_fn(globals);
 
 	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
-	human e = define_fn();
+	human human = define_fn();
 
 	typeof(on_human_increment) *on_human_increment_fn = get_on_human_increment_fn(file.dll);
 	typeof(on_human_print) *on_human_print_fn = get_on_human_print_fn(file.dll);
 
 	// Running
-	on_human_print_fn(globals, e);
+	on_human_print_fn(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_human_increment_fn(globals, e);
+		on_human_increment_fn(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_human_print_fn(globals, e);
+	on_human_print_fn(globals, human);
 
-	printf("test_1B_fn_table_pointer_slowdown took %.2f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_human_fns_pointer_slowdown took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
@@ -177,12 +177,12 @@ void test_100M_dlsym(void) {
 	file.init_globals_struct_fn(globals);
 
 	typeof(define_gun) *define_fn = get_define_gun_fn(file.dll);
-	gun e = define_fn();
+	gun gun = define_fn();
 
 	typeof(on_gun_print) *on_gun_print_fn = get_on_gun_print_fn(file.dll);
 
 	// Running
-	on_gun_print_fn(globals, e);
+	on_gun_print_fn(globals, gun);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
@@ -190,13 +190,13 @@ void test_100M_dlsym(void) {
 	for (size_t i = 0; i < 100000000; i++) {
 		typeof(on_gun_increment) *on_gun_increment_fn = get_on_gun_increment_fn(file.dll);
 
-		on_gun_increment_fn(globals, e);
+		on_gun_increment_fn(globals, gun);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_gun_print_fn(globals, e);
+	on_gun_print_fn(globals, gun);
 
 	printf("test_100M_dlsym took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -211,25 +211,25 @@ void test_1B_regular(void) {
 	file.init_globals_struct_fn(globals);
 
 	typeof(define_gun) *define_fn = get_define_gun_fn(file.dll);
-	gun e = define_fn();
+	gun gun = define_fn();
 
 	typeof(on_gun_increment) *on_gun_increment_fn = get_on_gun_increment_fn(file.dll);
 	typeof(on_gun_print) *on_gun_print_fn = get_on_gun_print_fn(file.dll);
 
 	// Running
-	on_gun_print_fn(globals, e);
+	on_gun_print_fn(globals, gun);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_gun_increment_fn(globals, e);
+		on_gun_increment_fn(globals, gun);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_gun_print_fn(globals, e);
+	on_gun_print_fn(globals, gun);
 
 	printf("test_1B_regular took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -248,9 +248,9 @@ int main() {
 
 	test_1B_regular();
 	test_100M_dlsym();
-	test_1B_fn_table_pointer_slowdown();
-	test_1B_fn_table();
-	test_1B_fn_table_cached();
+	test_1B_human_fns_pointer_slowdown();
+	test_1B_human_fns();
+	test_1B_human_fns_cached();
 
 	grug_free_mods();
 }
