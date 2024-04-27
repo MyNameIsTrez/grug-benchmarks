@@ -14,42 +14,42 @@ static double get_timespec_diff(struct timespec start, struct timespec end) {
 static typeof(define_vtable_entity) *get_define_vtable_entity_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get_fn(dll, "define_vtable_entity");
+	return grug_get(dll, "define_vtable_entity");
 	#pragma GCC diagnostic pop
 }
 
 static typeof(on_vtable_entity_increment) *get_on_vtable_entity_increment_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get_fn(dll, "on_vtable_entity_increment");
+	return grug_get(dll, "on_vtable_entity_increment");
 	#pragma GCC diagnostic pop
 }
 
 static typeof(on_vtable_entity_print) *get_on_vtable_entity_print_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get_fn(dll, "on_vtable_entity_print");
+	return grug_get(dll, "on_vtable_entity_print");
 	#pragma GCC diagnostic pop
 }
 
 static typeof(define_entity) *get_define_entity_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get_fn(dll, "define_entity");
+	return grug_get(dll, "define_entity");
 	#pragma GCC diagnostic pop
 }
 
 static typeof(on_entity_increment) *get_on_entity_increment_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get_fn(dll, "on_entity_increment");
+	return grug_get(dll, "on_entity_increment");
 	#pragma GCC diagnostic pop
 }
 
 static typeof(on_entity_print) *get_on_entity_print_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get_fn(dll, "on_entity_print");
+	return grug_get(dll, "on_entity_print");
 	#pragma GCC diagnostic pop
 }
 
