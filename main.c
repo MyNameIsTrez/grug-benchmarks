@@ -15,10 +15,10 @@ static double get_timespec_diff(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
 }
 
-static grug_file get_grug_file(char *name) {
-	for (size_t i = 0; i < mods.dirs[0].files_size; i++) {
-		if (strcmp(name, mods.dirs[0].files[i].name) == 0) {
-			return mods.dirs[0].files[i];
+static grug_file_t get_grug_file(char *name) {
+	for (size_t i = 0; i < grug_mods.dirs[0].files_size; i++) {
+		if (strcmp(name, grug_mods.dirs[0].files[i].name) == 0) {
+			return grug_mods.dirs[0].files[i];
 		}
 	}
 	abort();
@@ -26,7 +26,7 @@ static grug_file get_grug_file(char *name) {
 
 void test_1B_human_fns_cached(void) {
 	// Setup
-	grug_file file = get_grug_file("human.grug");
+	grug_file_t file = get_grug_file("human.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
@@ -59,7 +59,7 @@ void test_1B_human_fns_cached(void) {
 
 void test_1B_human_fns(void) {
 	// Setup
-	grug_file file = get_grug_file("human.grug");
+	grug_file_t file = get_grug_file("human.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
@@ -90,7 +90,7 @@ void test_1B_human_fns(void) {
 
 void test_1B_human_fns_pointer_slowdown(void) {
 	// Setup
-	grug_file file = get_grug_file("human.grug");
+	grug_file_t file = get_grug_file("human.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
@@ -124,7 +124,7 @@ void test_1B_human_fns_pointer_slowdown(void) {
 
 void test_100M_dlsym(void) {
 	// Setup
-	grug_file file = get_grug_file("gun.grug");
+	grug_file_t file = get_grug_file("gun.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
@@ -162,7 +162,7 @@ void test_100M_dlsym(void) {
 
 void test_1B_regular(void) {
 	// Setup
-	grug_file file = get_grug_file("gun.grug");
+	grug_file_t file = get_grug_file("gun.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
@@ -194,15 +194,11 @@ void test_1B_regular(void) {
 	free(globals);
 }
 
-static void error_handler(char *error_msg, char *filename, int line_number) {
-	fprintf(stderr, "%s in %s:%d\n", error_msg, filename, line_number);
-	exit(EXIT_FAILURE);
-}
-
 int main() {
-	grug_init(error_handler);
-
-	grug_reload_modified_mods();
+	if (grug_reload_modified_mods()) {
+		fprintf(stderr, "%s in %s:%d\n", grug_error.msg, grug_error.filename, grug_error.line_number);
+		exit(EXIT_FAILURE);
+	}
 
 	test_1B_regular();
 	test_100M_dlsym();
