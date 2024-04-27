@@ -11,24 +11,24 @@ static double get_timespec_diff(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
 }
 
-static typeof(define_vtable_entity) *get_define_vtable_entity_fn(void *dll) {
+static typeof(define_fn_table_entity) *get_define_fn_table_entity_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "define_vtable_entity");
+	return grug_get(dll, "define_fn_table_entity");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(on_vtable_entity_increment) *get_on_vtable_entity_increment_fn(void *dll) {
+static typeof(on_fn_table_entity_increment) *get_on_fn_table_entity_increment_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_vtable_entity_increment");
+	return grug_get(dll, "on_fn_table_entity_increment");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(on_vtable_entity_print) *get_on_vtable_entity_print_fn(void *dll) {
+static typeof(on_fn_table_entity_print) *get_on_fn_table_entity_print_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_vtable_entity_print");
+	return grug_get(dll, "on_fn_table_entity_print");
 	#pragma GCC diagnostic pop
 }
 
@@ -62,71 +62,109 @@ static grug_file get_grug_file(char *name) {
 	abort();
 }
 
-void test_1B_vtable(void) {
+void test_1B_fn_table_cached(void) {
 	// Setup
-	grug_file file = get_grug_file("vtable_entity.grug");
+	grug_file file = get_grug_file("fn_table_entity.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_vtable_entity) *define_fn = get_define_vtable_entity_fn(file.dll);
-	vtable_entity e = define_fn();
+	typeof(define_fn_table_entity) *define_fn = get_define_fn_table_entity_fn(file.dll);
+	fn_table_entity e = define_fn();
 
-	vtable vt = {
-		.on_vtable_entity_increment = get_on_vtable_entity_increment_fn(file.dll),
-		.on_vtable_entity_print = get_on_vtable_entity_print_fn(file.dll),
+	fn_table vt = {
+		.on_fn_table_entity_increment = get_on_fn_table_entity_increment_fn(file.dll),
+		.on_fn_table_entity_print = get_on_fn_table_entity_print_fn(file.dll),
 	};
-	e.vtable = &vt;
+	e.fn_table = &vt;
+
+	typeof(on_fn_table_entity_increment) *increment_fn = e.fn_table->on_fn_table_entity_increment;
 
 	// Running
-	e.vtable->on_vtable_entity_print(globals, e);
+	e.fn_table->on_fn_table_entity_print(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		e.vtable->on_vtable_entity_increment(globals, e);
+		increment_fn(globals, e);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	e.vtable->on_vtable_entity_print(globals, e);
+	e.fn_table->on_fn_table_entity_print(globals, e);
 
-	printf("test_1B_vtable took %.5f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_fn_table_cached took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
 
-void test_1B_vtable_pointer_slowdown(void) {
+void test_1B_fn_table(void) {
 	// Setup
-	grug_file file = get_grug_file("vtable_entity.grug");
+	grug_file file = get_grug_file("fn_table_entity.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_vtable_entity) *define_fn = get_define_vtable_entity_fn(file.dll);
-	vtable_entity e = define_fn();
+	typeof(define_fn_table_entity) *define_fn = get_define_fn_table_entity_fn(file.dll);
+	fn_table_entity e = define_fn();
 
-	typeof(on_vtable_entity_increment) *on_vtable_entity_increment_fn = get_on_vtable_entity_increment_fn(file.dll);
-	typeof(on_vtable_entity_print) *on_vtable_entity_print_fn = get_on_vtable_entity_print_fn(file.dll);
+	fn_table vt = {
+		.on_fn_table_entity_increment = get_on_fn_table_entity_increment_fn(file.dll),
+		.on_fn_table_entity_print = get_on_fn_table_entity_print_fn(file.dll),
+	};
+	e.fn_table = &vt;
 
 	// Running
-	on_vtable_entity_print_fn(globals, e);
+	e.fn_table->on_fn_table_entity_print(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_vtable_entity_increment_fn(globals, e);
+		e.fn_table->on_fn_table_entity_increment(globals, e);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_vtable_entity_print_fn(globals, e);
+	e.fn_table->on_fn_table_entity_print(globals, e);
 
-	printf("test_1B_vtable_pointer_slowdown took %.5f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_fn_table took %.2f seconds\n", get_timespec_diff(start, end));
+
+	free(globals);
+}
+
+void test_1B_fn_table_pointer_slowdown(void) {
+	// Setup
+	grug_file file = get_grug_file("fn_table_entity.grug");
+
+	void *globals = malloc(file.globals_struct_size);
+	file.init_globals_struct_fn(globals);
+
+	typeof(define_fn_table_entity) *define_fn = get_define_fn_table_entity_fn(file.dll);
+	fn_table_entity e = define_fn();
+
+	typeof(on_fn_table_entity_increment) *on_fn_table_entity_increment_fn = get_on_fn_table_entity_increment_fn(file.dll);
+	typeof(on_fn_table_entity_print) *on_fn_table_entity_print_fn = get_on_fn_table_entity_print_fn(file.dll);
+
+	// Running
+	on_fn_table_entity_print_fn(globals, e);
+
+    struct timespec start;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+
+	for (size_t i = 0; i < 1000000000; i++) {
+		on_fn_table_entity_increment_fn(globals, e);
+	}
+
+    struct timespec end;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+
+	on_fn_table_entity_print_fn(globals, e);
+
+	printf("test_1B_fn_table_pointer_slowdown took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
@@ -160,7 +198,7 @@ void test_100M_dlsym(void) {
 
 	on_entity_print_fn(globals, e);
 
-	printf("test_100M_dlsym took %.5f seconds\n", get_timespec_diff(start, end));
+	printf("test_100M_dlsym took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
@@ -193,7 +231,7 @@ void test_1B_regular(void) {
 
 	on_entity_print_fn(globals, e);
 
-	printf("test_1B_regular took %.5f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_regular took %.2f seconds\n", get_timespec_diff(start, end));
 
 	free(globals);
 }
@@ -210,8 +248,9 @@ int main() {
 
 	test_1B_regular();
 	test_100M_dlsym();
-	test_1B_vtable_pointer_slowdown();
-	test_1B_vtable();
+	test_1B_fn_table_pointer_slowdown();
+	test_1B_fn_table();
+	test_1B_fn_table_cached();
 
 	grug_free_mods();
 }

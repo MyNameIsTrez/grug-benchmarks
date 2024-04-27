@@ -13,16 +13,16 @@ typedef int8_t i8;
 
 typedef struct about about;
 typedef struct entity entity;
-typedef struct vtable_entity vtable_entity;
-typedef struct vtable vtable;
+typedef struct fn_table_entity fn_table_entity;
+typedef struct fn_table fn_table;
 
 entity define_entity(void);
 void on_entity_increment(void *globals, entity self);
 void on_entity_print(void *globals, entity self);
 
-vtable_entity define_vtable_entity(void);
-void on_vtable_entity_increment(void *globals, vtable_entity self);
-void on_vtable_entity_print(void *globals, vtable_entity self);
+fn_table_entity define_fn_table_entity(void);
+void on_fn_table_entity_increment(void *globals, fn_table_entity self);
+void on_fn_table_entity_print(void *globals, fn_table_entity self);
 
 struct about {
 	string name;
@@ -34,12 +34,12 @@ struct entity {
 	i8 placeholder;
 };
 
-struct vtable_entity {
+struct fn_table_entity {
 	i8 placeholder;
-	vtable *vtable;
+	fn_table *fn_table;
 };
 
-struct vtable {
-	typeof(on_vtable_entity_increment) *on_vtable_entity_increment;
-	typeof(on_vtable_entity_print) *on_vtable_entity_print;
+struct fn_table {
+	typeof(on_fn_table_entity_increment) *on_fn_table_entity_increment;
+	typeof(on_fn_table_entity_print) *on_fn_table_entity_print;
 };
