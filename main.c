@@ -11,45 +11,45 @@ static double get_timespec_diff(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
 }
 
-static typeof(define_fn_table_entity) *get_define_fn_table_entity_fn(void *dll) {
+static typeof(define_human) *get_define_human_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "define_fn_table_entity");
+	return grug_get(dll, "define_human");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(on_fn_table_entity_increment) *get_on_fn_table_entity_increment_fn(void *dll) {
+static typeof(on_human_increment) *get_on_human_increment_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_fn_table_entity_increment");
+	return grug_get(dll, "on_human_increment");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(on_fn_table_entity_print) *get_on_fn_table_entity_print_fn(void *dll) {
+static typeof(on_human_print) *get_on_human_print_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_fn_table_entity_print");
+	return grug_get(dll, "on_human_print");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(define_entity) *get_define_entity_fn(void *dll) {
+static typeof(define_gun) *get_define_gun_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "define_entity");
+	return grug_get(dll, "define_gun");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(on_entity_increment) *get_on_entity_increment_fn(void *dll) {
+static typeof(on_gun_increment) *get_on_gun_increment_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_entity_increment");
+	return grug_get(dll, "on_gun_increment");
 	#pragma GCC diagnostic pop
 }
 
-static typeof(on_entity_print) *get_on_entity_print_fn(void *dll) {
+static typeof(on_gun_print) *get_on_gun_print_fn(void *dll) {
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wpedantic"
-	return grug_get(dll, "on_entity_print");
+	return grug_get(dll, "on_gun_print");
 	#pragma GCC diagnostic pop
 }
 
@@ -64,24 +64,24 @@ static grug_file get_grug_file(char *name) {
 
 void test_1B_fn_table_cached(void) {
 	// Setup
-	grug_file file = get_grug_file("fn_table_entity.grug");
+	grug_file file = get_grug_file("human.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_fn_table_entity) *define_fn = get_define_fn_table_entity_fn(file.dll);
-	fn_table_entity e = define_fn();
+	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
+	human e = define_fn();
 
 	fn_table vt = {
-		.on_fn_table_entity_increment = get_on_fn_table_entity_increment_fn(file.dll),
-		.on_fn_table_entity_print = get_on_fn_table_entity_print_fn(file.dll),
+		.on_human_increment = get_on_human_increment_fn(file.dll),
+		.on_human_print = get_on_human_print_fn(file.dll),
 	};
 	e.fn_table = &vt;
 
-	typeof(on_fn_table_entity_increment) *increment_fn = e.fn_table->on_fn_table_entity_increment;
+	typeof(on_human_increment) *increment_fn = e.fn_table->on_human_increment;
 
 	// Running
-	e.fn_table->on_fn_table_entity_print(globals, e);
+	e.fn_table->on_human_print(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
@@ -93,7 +93,7 @@ void test_1B_fn_table_cached(void) {
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	e.fn_table->on_fn_table_entity_print(globals, e);
+	e.fn_table->on_human_print(globals, e);
 
 	printf("test_1B_fn_table_cached took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -102,34 +102,34 @@ void test_1B_fn_table_cached(void) {
 
 void test_1B_fn_table(void) {
 	// Setup
-	grug_file file = get_grug_file("fn_table_entity.grug");
+	grug_file file = get_grug_file("human.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_fn_table_entity) *define_fn = get_define_fn_table_entity_fn(file.dll);
-	fn_table_entity e = define_fn();
+	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
+	human e = define_fn();
 
 	fn_table vt = {
-		.on_fn_table_entity_increment = get_on_fn_table_entity_increment_fn(file.dll),
-		.on_fn_table_entity_print = get_on_fn_table_entity_print_fn(file.dll),
+		.on_human_increment = get_on_human_increment_fn(file.dll),
+		.on_human_print = get_on_human_print_fn(file.dll),
 	};
 	e.fn_table = &vt;
 
 	// Running
-	e.fn_table->on_fn_table_entity_print(globals, e);
+	e.fn_table->on_human_print(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		e.fn_table->on_fn_table_entity_increment(globals, e);
+		e.fn_table->on_human_increment(globals, e);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	e.fn_table->on_fn_table_entity_print(globals, e);
+	e.fn_table->on_human_print(globals, e);
 
 	printf("test_1B_fn_table took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -138,31 +138,31 @@ void test_1B_fn_table(void) {
 
 void test_1B_fn_table_pointer_slowdown(void) {
 	// Setup
-	grug_file file = get_grug_file("fn_table_entity.grug");
+	grug_file file = get_grug_file("human.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_fn_table_entity) *define_fn = get_define_fn_table_entity_fn(file.dll);
-	fn_table_entity e = define_fn();
+	typeof(define_human) *define_fn = get_define_human_fn(file.dll);
+	human e = define_fn();
 
-	typeof(on_fn_table_entity_increment) *on_fn_table_entity_increment_fn = get_on_fn_table_entity_increment_fn(file.dll);
-	typeof(on_fn_table_entity_print) *on_fn_table_entity_print_fn = get_on_fn_table_entity_print_fn(file.dll);
+	typeof(on_human_increment) *on_human_increment_fn = get_on_human_increment_fn(file.dll);
+	typeof(on_human_print) *on_human_print_fn = get_on_human_print_fn(file.dll);
 
 	// Running
-	on_fn_table_entity_print_fn(globals, e);
+	on_human_print_fn(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_fn_table_entity_increment_fn(globals, e);
+		on_human_increment_fn(globals, e);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_fn_table_entity_print_fn(globals, e);
+	on_human_print_fn(globals, e);
 
 	printf("test_1B_fn_table_pointer_slowdown took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -171,32 +171,32 @@ void test_1B_fn_table_pointer_slowdown(void) {
 
 void test_100M_dlsym(void) {
 	// Setup
-	grug_file file = get_grug_file("entity.grug");
+	grug_file file = get_grug_file("gun.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_entity) *define_fn = get_define_entity_fn(file.dll);
-	entity e = define_fn();
+	typeof(define_gun) *define_fn = get_define_gun_fn(file.dll);
+	gun e = define_fn();
 
-	typeof(on_entity_print) *on_entity_print_fn = get_on_entity_print_fn(file.dll);
+	typeof(on_gun_print) *on_gun_print_fn = get_on_gun_print_fn(file.dll);
 
 	// Running
-	on_entity_print_fn(globals, e);
+	on_gun_print_fn(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 100000000; i++) {
-		typeof(on_entity_increment) *on_entity_increment_fn = get_on_entity_increment_fn(file.dll);
+		typeof(on_gun_increment) *on_gun_increment_fn = get_on_gun_increment_fn(file.dll);
 
-		on_entity_increment_fn(globals, e);
+		on_gun_increment_fn(globals, e);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_entity_print_fn(globals, e);
+	on_gun_print_fn(globals, e);
 
 	printf("test_100M_dlsym took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -205,31 +205,31 @@ void test_100M_dlsym(void) {
 
 void test_1B_regular(void) {
 	// Setup
-	grug_file file = get_grug_file("entity.grug");
+	grug_file file = get_grug_file("gun.grug");
 
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	typeof(define_entity) *define_fn = get_define_entity_fn(file.dll);
-	entity e = define_fn();
+	typeof(define_gun) *define_fn = get_define_gun_fn(file.dll);
+	gun e = define_fn();
 
-	typeof(on_entity_increment) *on_entity_increment_fn = get_on_entity_increment_fn(file.dll);
-	typeof(on_entity_print) *on_entity_print_fn = get_on_entity_print_fn(file.dll);
+	typeof(on_gun_increment) *on_gun_increment_fn = get_on_gun_increment_fn(file.dll);
+	typeof(on_gun_print) *on_gun_print_fn = get_on_gun_print_fn(file.dll);
 
 	// Running
-	on_entity_print_fn(globals, e);
+	on_gun_print_fn(globals, e);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		on_entity_increment_fn(globals, e);
+		on_gun_increment_fn(globals, e);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	on_entity_print_fn(globals, e);
+	on_gun_print_fn(globals, e);
 
 	printf("test_1B_regular took %.2f seconds\n", get_timespec_diff(start, end));
 

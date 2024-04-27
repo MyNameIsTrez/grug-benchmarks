@@ -1,6 +1,6 @@
 define_about() about {
     return {
-        .name = "entity",
+        .name = "entities",
         .version = "1.0.0",
         .author = "MyNameIsTrez",
     }

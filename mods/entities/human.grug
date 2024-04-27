@@ -1,4 +1,4 @@
-define_entity() entity {
+define_human() human {
     return {
         .placeholder = 0,
     }
@@ -6,10 +6,10 @@ define_entity() entity {
 
 i: i64 = 0
 
-on_entity_increment(self: entity) {
+on_human_increment(self: human) {
     i = i + 1
 }
 
-on_entity_print(self: entity) {
+on_human_print(self: human) {
     printf("i: %d\n", i)
 }

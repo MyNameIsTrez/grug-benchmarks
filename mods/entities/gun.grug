@@ -1,0 +1,15 @@
+define_gun() gun {
+    return {
+        .placeholder = 0,
+    }
+}
+
+i: i64 = 0
+
+on_gun_increment(self: gun) {
+    i = i + 1
+}
+
+on_gun_print(self: gun) {
+    printf("i: %d\n", i)
+}

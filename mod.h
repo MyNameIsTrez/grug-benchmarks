@@ -12,17 +12,17 @@ typedef int64_t i64;
 typedef int8_t i8;
 
 typedef struct about about;
-typedef struct entity entity;
-typedef struct fn_table_entity fn_table_entity;
+typedef struct gun gun;
+typedef struct human human;
 typedef struct fn_table fn_table;
 
-entity define_entity(void);
-void on_entity_increment(void *globals, entity self);
-void on_entity_print(void *globals, entity self);
+gun define_gun(void);
+void on_gun_increment(void *globals, gun self);
+void on_gun_print(void *globals, gun self);
 
-fn_table_entity define_fn_table_entity(void);
-void on_fn_table_entity_increment(void *globals, fn_table_entity self);
-void on_fn_table_entity_print(void *globals, fn_table_entity self);
+human define_human(void);
+void on_human_increment(void *globals, human self);
+void on_human_print(void *globals, human self);
 
 struct about {
 	string name;
@@ -30,16 +30,16 @@ struct about {
 	string author;
 };
 
-struct entity {
+struct gun {
 	i8 placeholder;
 };
 
-struct fn_table_entity {
+struct human {
 	i8 placeholder;
 	fn_table *fn_table;
 };
 
 struct fn_table {
-	typeof(on_fn_table_entity_increment) *on_fn_table_entity_increment;
-	typeof(on_fn_table_entity_print) *on_fn_table_entity_print;
+	typeof(on_human_increment) *on_human_increment;
+	typeof(on_human_print) *on_human_print;
 };
