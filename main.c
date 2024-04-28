@@ -31,7 +31,7 @@ void test_1B_human_fns_cached(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	human_t human = *(human_t *)file.define;
+	human human = *(struct human *)file.define;
 
 	human.on_fns = file.on_fns;
 
@@ -64,7 +64,7 @@ void test_1B_human_fns(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	human_t human = *(human_t *)file.define;
+	human human = *(struct human *)file.define;
 
 	human.on_fns = file.on_fns;
 
@@ -95,9 +95,9 @@ void test_1B_human_fns_pointer_slowdown(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	human_t human = *(human_t *)file.define;
+	human human = *(struct human *)file.define;
 
-	human_on_fns_t *on_fns = file.on_fns;
+	human_on_fns *on_fns = file.on_fns;
 
 	typeof(on_human_increment) *increment = on_fns->increment;
 	typeof(on_human_print) *print = on_fns->print;
@@ -129,9 +129,9 @@ void test_100M_dlsym(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	gun_t gun = *(gun_t *)file.define;
+	gun gun = *(struct gun *)file.define;
 
-	gun_on_fns_t *on_fns = file.on_fns;
+	gun_on_fns *on_fns = file.on_fns;
 
 	typeof(on_gun_print) *print = on_fns->print;
 
@@ -144,7 +144,7 @@ void test_100M_dlsym(void) {
 	for (size_t i = 0; i < 100000000; i++) {
 		// Since on_ functions are static, we can only access them through the exported on_fns.
 		// on_ functions didn't use to be static, but this test still took the same roughly 10 seconds regardless.
-		gun_on_fns_t *on_fns_hot = dlsym(file.dll, "on_fns");
+		gun_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
 		typeof(on_gun_increment) *increment = on_fns_hot->increment;
 
 		increment(globals, gun);
@@ -167,9 +167,9 @@ void test_1B_regular(void) {
 	void *globals = malloc(file.globals_struct_size);
 	file.init_globals_struct_fn(globals);
 
-	gun_t gun = *(gun_t *)file.define;
+	gun gun = *(struct gun *)file.define;
 
-	gun_on_fns_t *on_fns = file.on_fns;
+	gun_on_fns *on_fns = file.on_fns;
 
 	typeof(on_gun_increment) *increment = on_fns->increment;
 	typeof(on_gun_print) *print = on_fns->print;

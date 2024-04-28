@@ -11,19 +11,18 @@ typedef char *string;
 typedef int64_t i64;
 typedef int8_t i8;
 
-typedef struct about about_t;
-typedef struct gun gun_t;
-typedef struct gun_on_fns gun_on_fns_t;
-typedef struct human human_t;
-typedef struct human_on_fns human_on_fns_t;
+typedef struct gun gun;
+typedef struct gun_on_fns gun_on_fns;
+typedef struct human human;
+typedef struct human_on_fns human_on_fns;
 
-gun_t define_gun(void);
-void on_gun_increment(void *globals, gun_t self);
-void on_gun_print(void *globals, gun_t self);
+gun define_gun(void);
+void on_gun_increment(void *globals, gun self);
+void on_gun_print(void *globals, gun self);
 
-human_t define_human(void);
-void on_human_increment(void *globals, human_t self);
-void on_human_print(void *globals, human_t self);
+human define_human(void);
+void on_human_increment(void *globals, human self);
+void on_human_print(void *globals, human self);
 
 struct about {
 	string name;
@@ -42,7 +41,7 @@ struct gun_on_fns {
 
 struct human {
 	i8 placeholder;
-	human_on_fns_t *on_fns;
+	human_on_fns *on_fns;
 };
 
 struct human_on_fns {
