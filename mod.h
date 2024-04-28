@@ -3,7 +3,7 @@
 // grug mods always require these
 #include <string.h> // size_t, memcpy()
 
-#include <stdint.h>
+#include <stdint.h> // int64_t, int8_t
 
 int printf(const char *restrict format, ...);
 
