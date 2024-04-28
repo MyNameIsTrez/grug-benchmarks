@@ -36,8 +36,8 @@ struct gun {
 };
 
 struct gun_on_fns {
-	typeof(on_gun_increment) *on_increment;
-	typeof(on_gun_print) *on_print;
+	typeof(on_gun_increment) *increment;
+	typeof(on_gun_print) *print;
 };
 
 struct human {
@@ -46,6 +46,6 @@ struct human {
 };
 
 struct human_on_fns {
-	typeof(on_human_increment) *on_increment;
-	typeof(on_human_print) *on_print;
+	typeof(on_human_increment) *increment;
+	typeof(on_human_print) *print;
 };

@@ -35,10 +35,10 @@ void test_1B_human_fns_cached(void) {
 
 	human.on_fns = file.on_fns;
 
-	typeof(on_human_increment) *increment = human.on_fns->on_increment;
+	typeof(on_human_increment) *increment = human.on_fns->increment;
 
 	// Running
-	human.on_fns->on_print(globals, human);
+	human.on_fns->print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
@@ -50,7 +50,7 @@ void test_1B_human_fns_cached(void) {
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	human.on_fns->on_print(globals, human);
+	human.on_fns->print(globals, human);
 
 	printf("test_1B_human_fns_cached took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -69,19 +69,19 @@ void test_1B_human_fns(void) {
 	human.on_fns = file.on_fns;
 
 	// Running
-	human.on_fns->on_print(globals, human);
+	human.on_fns->print(globals, human);
 
     struct timespec start;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
-		human.on_fns->on_increment(globals, human);
+		human.on_fns->increment(globals, human);
 	}
 
     struct timespec end;
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	human.on_fns->on_print(globals, human);
+	human.on_fns->print(globals, human);
 
 	printf("test_1B_human_fns took %.2f seconds\n", get_timespec_diff(start, end));
 
@@ -99,8 +99,8 @@ void test_1B_human_fns_pointer_slowdown(void) {
 
 	human_on_fns *on_fns = file.on_fns;
 
-	typeof(on_human_increment) *increment = on_fns->on_increment;
-	typeof(on_human_print) *print = on_fns->on_print;
+	typeof(on_human_increment) *increment = on_fns->increment;
+	typeof(on_human_print) *print = on_fns->print;
 
 	// Running
 	print(globals, human);
@@ -133,7 +133,7 @@ void test_100M_dlsym(void) {
 
 	gun_on_fns *on_fns = file.on_fns;
 
-	typeof(on_gun_print) *print = on_fns->on_print;
+	typeof(on_gun_print) *print = on_fns->print;
 
 	// Running
 	print(globals, gun);
@@ -142,10 +142,10 @@ void test_100M_dlsym(void) {
     clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 100000000; i++) {
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wpedantic"
-		typeof(on_gun_increment) *increment = dlsym(file.dll, "on_increment");
-		#pragma GCC diagnostic pop
+		// Since on_ functions are static, we can only access them through the exported on_fns.
+		// on_ functions didn't use to be static, but this test still took the same roughly 10 seconds regardless.
+		gun_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
+		typeof(on_gun_increment) *increment = on_fns_hot->increment;
 
 		increment(globals, gun);
 	}
@@ -171,8 +171,8 @@ void test_1B_regular(void) {
 
 	gun_on_fns *on_fns = file.on_fns;
 
-	typeof(on_gun_increment) *increment = on_fns->on_increment;
-	typeof(on_gun_print) *print = on_fns->on_print;
+	typeof(on_gun_increment) *increment = on_fns->increment;
+	typeof(on_gun_print) *print = on_fns->print;
 
 	// Running
 	print(globals, gun);
