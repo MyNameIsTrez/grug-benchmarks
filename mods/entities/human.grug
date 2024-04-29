@@ -11,5 +11,5 @@ on_increment(self: human) {
 }
 
 on_print(self: human) {
-    printf("i: %d\n", i)
+    printf("i: %ld\n", i)
 }

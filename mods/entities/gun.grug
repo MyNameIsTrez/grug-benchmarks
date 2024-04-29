@@ -11,5 +11,5 @@ on_increment(self: gun) {
 }
 
 on_print(self: gun) {
-    printf("i: %d\n", i)
+    printf("i: %ld\n", i)
 }
