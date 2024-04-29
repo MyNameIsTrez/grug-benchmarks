@@ -11,7 +11,7 @@
 #include <time.h>
 #include <unistd.h>
 
-static double get_timespec_diff(struct timespec start, struct timespec end) {
+static double get_elapsed_seconds(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
 }
 
@@ -22,104 +22,6 @@ static grug_file_t get_grug_file(char *name) {
 		}
 	}
 	abort();
-}
-
-void test_1B_human_fns_cached(void) {
-	// Setup
-	grug_file_t file = get_grug_file("human.grug");
-
-	void *globals = malloc(file.globals_struct_size);
-	file.init_globals_struct_fn(globals);
-
-	human human = *(struct human *)file.define;
-
-	human.on_fns = file.on_fns;
-
-	typeof(on_human_increment) *increment = human.on_fns->increment;
-
-	// Running
-	human.on_fns->print(globals, human);
-
-    struct timespec start;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-
-	for (size_t i = 0; i < 1000000000; i++) {
-		increment(globals, human);
-	}
-
-    struct timespec end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
-
-	human.on_fns->print(globals, human);
-
-	printf("test_1B_human_fns_cached took %.2f seconds\n", get_timespec_diff(start, end));
-
-	free(globals);
-}
-
-void test_1B_human_fns(void) {
-	// Setup
-	grug_file_t file = get_grug_file("human.grug");
-
-	void *globals = malloc(file.globals_struct_size);
-	file.init_globals_struct_fn(globals);
-
-	human human = *(struct human *)file.define;
-
-	human.on_fns = file.on_fns;
-
-	// Running
-	human.on_fns->print(globals, human);
-
-    struct timespec start;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-
-	for (size_t i = 0; i < 1000000000; i++) {
-		human.on_fns->increment(globals, human);
-	}
-
-    struct timespec end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
-
-	human.on_fns->print(globals, human);
-
-	printf("test_1B_human_fns took %.2f seconds\n", get_timespec_diff(start, end));
-
-	free(globals);
-}
-
-void test_1B_human_fns_pointer_slowdown(void) {
-	// Setup
-	grug_file_t file = get_grug_file("human.grug");
-
-	void *globals = malloc(file.globals_struct_size);
-	file.init_globals_struct_fn(globals);
-
-	human human = *(struct human *)file.define;
-
-	human_on_fns *on_fns = file.on_fns;
-
-	typeof(on_human_increment) *increment = on_fns->increment;
-	typeof(on_human_print) *print = on_fns->print;
-
-	// Running
-	print(globals, human);
-
-    struct timespec start;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
-
-	for (size_t i = 0; i < 1000000000; i++) {
-		increment(globals, human);
-	}
-
-    struct timespec end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
-
-	print(globals, human);
-
-	printf("test_1B_human_fns_pointer_slowdown took %.2f seconds\n", get_timespec_diff(start, end));
-
-	free(globals);
 }
 
 void test_100M_dlsym(void) {
@@ -155,12 +57,43 @@ void test_100M_dlsym(void) {
 
 	print(globals, gun);
 
-	printf("test_100M_dlsym took %.2f seconds\n", get_timespec_diff(start, end));
+	printf("test_100M_dlsym took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
 
-void test_1B_regular(void) {
+void test_1B_not_cached(void) {
+	// Setup
+	grug_file_t file = get_grug_file("human.grug");
+
+	void *globals = malloc(file.globals_struct_size);
+	file.init_globals_struct_fn(globals);
+
+	human human = *(struct human *)file.define;
+
+	human.on_fns = file.on_fns;
+
+	// Running
+	human.on_fns->print(globals, human);
+
+    struct timespec start;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+
+	for (size_t i = 0; i < 1000000000; i++) {
+		human.on_fns->increment(globals, human);
+	}
+
+    struct timespec end;
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+
+	human.on_fns->print(globals, human);
+
+	printf("test_1B_not_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
+
+	free(globals);
+}
+
+void test_1B_cached(void) {
 	// Setup
 	grug_file_t file = get_grug_file("gun.grug");
 
@@ -189,7 +122,7 @@ void test_1B_regular(void) {
 
 	print(globals, gun);
 
-	printf("test_1B_regular took %.2f seconds\n", get_timespec_diff(start, end));
+	printf("test_1B_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
@@ -200,11 +133,9 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
-	test_1B_regular();
+	test_1B_cached();
+	test_1B_not_cached();
 	test_100M_dlsym();
-	test_1B_human_fns_pointer_slowdown();
-	test_1B_human_fns();
-	test_1B_human_fns_cached();
 
 	grug_free_mods();
 }
