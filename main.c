@@ -40,8 +40,8 @@ void test_100M_dlsym(void) {
 	// Running
 	print(globals, gun);
 
-    struct timespec start;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+	struct timespec start;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 100000000; i++) {
 		// Since on_ functions are static, we can only access them through the exported on_fns.
@@ -52,8 +52,8 @@ void test_100M_dlsym(void) {
 		increment(globals, gun);
 	}
 
-    struct timespec end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+	struct timespec end;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
 	print(globals, gun);
 
@@ -76,15 +76,15 @@ void test_1B_not_cached(void) {
 	// Running
 	human.on_fns->print(globals, human);
 
-    struct timespec start;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+	struct timespec start;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
 		human.on_fns->increment(globals, human);
 	}
 
-    struct timespec end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+	struct timespec end;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
 	human.on_fns->print(globals, human);
 
@@ -110,15 +110,15 @@ void test_1B_cached(void) {
 	// Running
 	print(globals, gun);
 
-    struct timespec start;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+	struct timespec start;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 1000000000; i++) {
 		increment(globals, gun);
 	}
 
-    struct timespec end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+	struct timespec end;
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
 	print(globals, gun);
 
