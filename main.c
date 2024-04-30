@@ -128,7 +128,7 @@ void test_1B_cached(void) {
 }
 
 int main() {
-	if (grug_reload_modified_mods()) {
+	if (grug_regenerate_modified_mods()) {
 		fprintf(stderr, "%s in %s:%d\n", grug_error.msg, grug_error.filename, grug_error.line_number);
 		exit(EXIT_FAILURE);
 	}
