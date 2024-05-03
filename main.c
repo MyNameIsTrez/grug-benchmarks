@@ -11,6 +11,10 @@
 #include <time.h>
 #include <unistd.h>
 
+int64_t get_1(void) {
+	return 1;
+}
+
 static double get_elapsed_seconds(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
 }
