@@ -4,3 +4,5 @@ a.exe
 a.out
 log.log
 foo.so
+perf.data
+perf.data.old
