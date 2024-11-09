@@ -2,24 +2,63 @@
 #define _POSIX_C_SOURCE 199309L
 
 #include "grug.h"
-#include "mod.h"
 
 #include <dlfcn.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
-int64_t get_1(void) {
+typedef int32_t i32;
+
+struct gun_on_fns {
+	void (*print)(void *globals, i32 self);
+	void (*increment)(void *globals, i32 self);
+};
+
+struct gun {
+	i32 placeholder;
+};
+
+struct human_on_fns {
+	void (*print)(void *globals, i32 self);
+	void (*increment)(void *globals, i32 self);
+};
+
+struct human {
+	i32 placeholder;
+	struct human_on_fns *on_fns;
+};
+
+void game_fn_print_i32(i32 i) {
+	printf("i: %d\n", i);
+}
+
+i32 game_fn_get_1(void) {
 	return 1;
+}
+
+static struct gun gun_definition;
+void game_fn_define_gun(i32 placeholder) {
+	gun_definition = (struct gun){
+		.placeholder = placeholder,
+	};
+}
+
+static struct human human_definition;
+void game_fn_define_human(i32 placeholder) {
+	human_definition = (struct human){
+		.placeholder = placeholder,
+	};
 }
 
 static double get_elapsed_seconds(struct timespec start, struct timespec end) {
 	return (double)(end.tv_sec - start.tv_sec) + 1.0e-9 * (double)(end.tv_nsec - start.tv_nsec);
 }
 
-static grug_file_t get_grug_file(char *name) {
+static struct grug_file get_grug_file(char *name) {
 	for (size_t i = 0; i < grug_mods.dirs[0].files_size; i++) {
 		if (strcmp(name, grug_mods.dirs[0].files[i].name) == 0) {
 			return grug_mods.dirs[0].files[i];
@@ -28,118 +67,116 @@ static grug_file_t get_grug_file(char *name) {
 	abort();
 }
 
-void test_100M_dlsym(void) {
+void test_1M_dlsym(void) {
 	// Setup
-	grug_file_t file = get_grug_file("gun.grug");
+	struct grug_file file = get_grug_file("gun.grug");
 
-	void *globals = malloc(file.globals_struct_size);
-	file.init_globals_struct_fn(globals);
+	void *globals = malloc(file.globals_size);
+	file.init_globals_fn(globals);
 
-	gun gun = *(struct gun *)file.define;
-
-	gun_on_fns *on_fns = file.on_fns;
-
-	typeof(on_gun_print) *print = on_fns->print;
+	struct gun_on_fns *on_fns = file.on_fns;
 
 	// Running
-	print(globals, gun);
+	on_fns->print(globals, 0);
 
 	struct timespec start;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-	for (size_t i = 0; i < 100000000; i++) {
-		// Since on_ functions are static, we can only access them through the exported on_fns.
-		// on_ functions didn't use to be static, but this test still took the same roughly 10 seconds regardless.
-		gun_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
-		typeof(on_gun_increment) *increment = on_fns_hot->increment;
-
-		increment(globals, gun);
+	for (size_t i = 0; i < 1000000; i++) {
+		struct gun_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
+		on_fns_hot->increment(globals, 0);
 	}
 
 	struct timespec end;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	print(globals, gun);
+	on_fns->print(globals, 0);
 
-	printf("test_100M_dlsym took %.2f seconds\n", get_elapsed_seconds(start, end));
+	printf("test_1M_dlsym took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
 
-void test_1B_not_cached(void) {
+void test_1M_not_cached(void) {
 	// Setup
-	grug_file_t file = get_grug_file("human.grug");
+	struct grug_file file = get_grug_file("human.grug");
 
-	void *globals = malloc(file.globals_struct_size);
-	file.init_globals_struct_fn(globals);
+	void *globals = malloc(file.globals_size);
+	file.init_globals_fn(globals);
 
-	human human = *(struct human *)file.define;
+	file.define_fn();
+	struct human human = human_definition;
 
 	human.on_fns = file.on_fns;
 
 	// Running
-	human.on_fns->print(globals, human);
+	human.on_fns->print(globals, 0);
 
 	struct timespec start;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-	for (size_t i = 0; i < 1000000000; i++) {
-		human.on_fns->increment(globals, human);
+	for (size_t i = 0; i < 1000000; i++) {
+		human.on_fns->increment(globals, 0);
 	}
 
 	struct timespec end;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	human.on_fns->print(globals, human);
+	human.on_fns->print(globals, 0);
 
-	printf("test_1B_not_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
+	printf("test_1M_not_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
 
-void test_1B_cached(void) {
+void test_1M_cached(void) {
 	// Setup
-	grug_file_t file = get_grug_file("gun.grug");
+	struct grug_file file = get_grug_file("gun.grug");
 
-	void *globals = malloc(file.globals_struct_size);
-	file.init_globals_struct_fn(globals);
+	void *globals = malloc(file.globals_size);
+	file.init_globals_fn(globals);
 
-	gun gun = *(struct gun *)file.define;
+	struct gun_on_fns *on_fns = file.on_fns;
 
-	gun_on_fns *on_fns = file.on_fns;
-
-	typeof(on_gun_increment) *increment = on_fns->increment;
-	typeof(on_gun_print) *print = on_fns->print;
+	void (*increment)(void *globals, i32 self) = on_fns->increment;
+	void (*print)(void *globals, i32 self) = on_fns->print;
 
 	// Running
-	print(globals, gun);
+	print(globals, 0);
 
 	struct timespec start;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-	for (size_t i = 0; i < 1000000000; i++) {
-		increment(globals, gun);
+	for (size_t i = 0; i < 1000000; i++) {
+		increment(globals, 0);
 	}
 
 	struct timespec end;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
 
-	print(globals, gun);
+	print(globals, 0);
 
-	printf("test_1B_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
+	printf("test_1M_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
 
-int main() {
+static void runtime_error_handler(char *reason, enum grug_runtime_error_type type, char *on_fn_name, char *on_fn_path) {
+	(void)type;
+	fprintf(stderr, "grug runtime error in %s(): %s, in %s\n", on_fn_name, reason, on_fn_path);
+}
+
+int main(void) {
+	grug_set_runtime_error_handler(runtime_error_handler);
+
 	if (grug_regenerate_modified_mods()) {
-		fprintf(stderr, "%s in %s:%d\n", grug_error.msg, grug_error.filename, grug_error.line_number);
+		fprintf(stderr, "grug loading error: %s, in %s (detected in grug.c:%d)\n", grug_error.msg, grug_error.path, grug_error.grug_c_line_number);
 		exit(EXIT_FAILURE);
 	}
 
-	test_1B_cached();
-	test_1B_not_cached();
-	test_100M_dlsym();
+	test_1M_cached();
+	test_1M_not_cached();
+	test_1M_dlsym();
 
 	grug_free_mods();
 }

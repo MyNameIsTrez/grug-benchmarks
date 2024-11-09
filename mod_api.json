@@ -1,0 +1,77 @@
+{
+    "entities": {
+        "gun": {
+            "description": "A gun.",
+            "fields": [
+                {
+                    "name": "placeholder",
+                    "type": "i32"
+                }
+            ],
+            "on_functions": {
+                "on_print": {
+                    "description": "Called when the game asks this entity's global 'i' value to be printed.",
+                    "arguments": [
+                        {
+                            "name": "self",
+                            "type": "i32"
+                        }
+                    ]
+                },
+                "on_increment": {
+                    "description": "Called when the game asks this entity's global 'i' value to be incremented.",
+                    "arguments": [
+                        {
+                            "name": "self",
+                            "type": "i32"
+                        }
+                    ]
+                }
+            }
+        },
+        "human": {
+            "description": "A human.",
+            "fields": [
+                {
+                    "name": "placeholder",
+                    "type": "i32"
+                }
+            ],
+            "on_functions": {
+                "on_print": {
+                    "description": "Called when the game asks this entity's global 'i' value to be printed.",
+                    "arguments": [
+                        {
+                            "name": "self",
+                            "type": "i32"
+                        }
+                    ]
+                },
+                "on_increment": {
+                    "description": "Called when the game asks this entity's global 'i' value to be incremented.",
+                    "arguments": [
+                        {
+                            "name": "self",
+                            "type": "i32"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "game_functions": {
+        "print_i32": {
+            "description": "Prints an i32.",
+            "arguments": [
+                {
+                    "name": "i",
+                    "type": "i32"
+                }
+            ]
+        },
+        "get_1": {
+            "description": "Returns the value 1.",
+            "return_type": "i32"
+        }
+    }
+}

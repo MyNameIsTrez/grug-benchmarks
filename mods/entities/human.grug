@@ -4,12 +4,12 @@ define() human {
     }
 }
 
-i: i64 = 0
+i: i32 = 0
 
-on_increment(self: human) {
-    i = i + get_1()
+on_print(self: i32) {
+    print_i32(i)
 }
 
-on_print(self: human) {
-    printf("i: %ld\n", i)
+on_increment(self: i32) {
+    i = i + get_1()
 }

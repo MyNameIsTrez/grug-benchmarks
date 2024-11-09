@@ -1,7 +1,0 @@
-define() about {
-    return {
-        .name = "entities",
-        .version = "1.0.0",
-        .author = "MyNameIsTrez",
-    }
-}
