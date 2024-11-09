@@ -2,7 +2,10 @@
 mod_dlls
 a.exe
 a.out
+kernel.svg
 log.log
 foo.so
+out.folded
+out.perf
 perf.data
 perf.data.old
