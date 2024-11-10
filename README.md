@@ -22,6 +22,26 @@ If you see the warning `Kernel address maps are restricted. ... Check /proc/sys/
 
 ### Visualizing the stack trace with FlameGraph
 
+Using FlameGraph, I got this output:
+
+![image](https://github.com/user-attachments/assets/e9c0647c-36b9-432d-b1b5-4d7b33216605)
+
+![image](https://github.com/user-attachments/assets/c1bba5af-9b11-4f13-bd2e-65a4fe42258a)
+
+What was slow here was the fact that every `on_` function call enabled and disabled runtime error handling (division by 0/stack overflow/functions taking too long).
+
+I decided to call this behavior "safe" mode, and I then modified the compiler so that it also generates a "fast" version of every `on_` function, which *does not* protect against mod runtime errors:
+
+![image](https://github.com/user-attachments/assets/2af7dc83-6bd8-4a3e-9829-d7f73d7acf7b)
+
+After making the 1st and 2nd test do 1000x more iterations, and the 3rd test 100x more iterations:
+
+![image](https://github.com/user-attachments/assets/c6b2395a-bc01-428f-a362-bad596debbb0)
+
+![image](https://github.com/user-attachments/assets/f3ba3c4f-13b3-40bb-86bb-477fcec8be16)
+
+#### Steps
+
 1. Clone [FlameGraph](https://github.com/brendangregg/FlameGraph)
 2. After you've generated `perf.data` using the earlier `perf record -g ./a.out`, run `sudo perf script -f > out.perf` to output the trace to `out.perf`
 3. Run `pwd` in your FlameGraph clone, add `export FLAMEGRAPH_PATH=<pwd path goes here>` to your `~/.bashrc`, and run `source ~/.bashrc` to apply the change to your current terminal session
