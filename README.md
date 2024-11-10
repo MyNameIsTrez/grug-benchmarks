@@ -26,5 +26,5 @@ If you see the warning `Kernel address maps are restricted. ... Check /proc/sys/
 2. After you've generated `perf.data` using the earlier `perf record -g ./a.out`, run `sudo perf script -f > out.perf` to output the trace to `out.perf`
 3. Run `pwd` in your FlameGraph clone, add `export FLAMEGRAPH_PATH=<pwd path goes here>` to your `~/.bashrc`, and run `source ~/.bashrc` to apply the change to your current terminal session
 4. Run `$FLAMEGRAPH_PATH/stackcollapse-perf.pl out.perf > out.folded`
-5. Run `$FLAMEGRAPH_PATH/flamegraph.pl out.folded > kernel.svg`
+5. Run `$FLAMEGRAPH_PATH/flamegraph.pl out.folded --width 2450 --fontsize 15 > kernel.svg`
 6. Drag the generated `kernel.svg` into your browser as a new tab. You're able to click the colored boxes to look at a subsection of the stack trace.
