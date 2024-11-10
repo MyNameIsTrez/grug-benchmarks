@@ -67,7 +67,7 @@ static struct grug_file get_grug_file(char *name) {
 	abort();
 }
 
-void test_1M_dlsym(void) {
+void test_100M_dlsym(void) {
 	// Setup
 	struct grug_file file = get_grug_file("gun.grug");
 
@@ -82,7 +82,7 @@ void test_1M_dlsym(void) {
 	struct timespec start;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-	for (size_t i = 0; i < 1000000; i++) {
+	for (size_t i = 0; i < 100000000; i++) {
 		struct gun_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
 		on_fns_hot->increment(globals, 0);
 	}
@@ -92,12 +92,12 @@ void test_1M_dlsym(void) {
 
 	on_fns->print(globals, 0);
 
-	printf("test_1M_dlsym took %.2f seconds\n", get_elapsed_seconds(start, end));
+	printf("test_100M_dlsym took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
 
-void test_1M_not_cached(void) {
+void test_1B_not_cached(void) {
 	// Setup
 	struct grug_file file = get_grug_file("human.grug");
 
@@ -115,7 +115,7 @@ void test_1M_not_cached(void) {
 	struct timespec start;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-	for (size_t i = 0; i < 1000000; i++) {
+	for (size_t i = 0; i < 1000000000; i++) {
 		human.on_fns->increment(globals, 0);
 	}
 
@@ -124,12 +124,12 @@ void test_1M_not_cached(void) {
 
 	human.on_fns->print(globals, 0);
 
-	printf("test_1M_not_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
+	printf("test_1B_not_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
 
-void test_1M_cached(void) {
+void test_1B_cached(void) {
 	// Setup
 	struct grug_file file = get_grug_file("gun.grug");
 
@@ -147,7 +147,7 @@ void test_1M_cached(void) {
 	struct timespec start;
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
-	for (size_t i = 0; i < 1000000; i++) {
+	for (size_t i = 0; i < 1000000000; i++) {
 		increment(globals, 0);
 	}
 
@@ -156,7 +156,7 @@ void test_1M_cached(void) {
 
 	print(globals, 0);
 
-	printf("test_1M_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
+	printf("test_1B_cached took %.2f seconds\n", get_elapsed_seconds(start, end));
 
 	free(globals);
 }
@@ -169,14 +169,16 @@ static void runtime_error_handler(char *reason, enum grug_runtime_error_type typ
 int main(void) {
 	grug_set_runtime_error_handler(runtime_error_handler);
 
+	grug_switch_on_fns_to_fast_mode();
+
 	if (grug_regenerate_modified_mods()) {
 		fprintf(stderr, "grug loading error: %s, in %s (detected in grug.c:%d)\n", grug_error.msg, grug_error.path, grug_error.grug_c_line_number);
 		exit(EXIT_FAILURE);
 	}
 
-	test_1M_cached();
-	test_1M_not_cached();
-	test_1M_dlsym();
+	test_1B_cached();
+	test_1B_not_cached();
+	test_100M_dlsym();
 
 	grug_free_mods();
 }
