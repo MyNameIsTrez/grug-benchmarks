@@ -40,7 +40,11 @@ After making the 1st and 2nd test do 1000x more iterations, and the 3rd test 100
 
 ![image](https://github.com/user-attachments/assets/f3ba3c4f-13b3-40bb-86bb-477fcec8be16)
 
-Now that the `increment()` and `get_1()` calls are pretty much all the graph shows, there isn't much left to optimize (without writing an entire optimization pass for the generated machine code).
+Now that the `get_1()` and `increment()` calls are pretty much all the graph shows, there isn't much left to optimize (without writing an entire optimization pass for the generated machine code):
+
+![image](https://github.com/user-attachments/assets/6f7e9634-f8c1-4761-9f33-c1e874b27730)
+
+![image](https://github.com/user-attachments/assets/4c9488fc-10b8-4115-9451-977eaa0812a9)
 
 #### Steps
 
