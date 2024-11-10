@@ -40,6 +40,8 @@ After making the 1st and 2nd test do 1000x more iterations, and the 3rd test 100
 
 ![image](https://github.com/user-attachments/assets/f3ba3c4f-13b3-40bb-86bb-477fcec8be16)
 
+Now that the `increment()` and `get_1()` calls are pretty much all the graph shows, there isn't much left to optimize (without writing an entire optimization pass for the outputted machine code).
+
 #### Steps
 
 1. Clone [FlameGraph](https://github.com/brendangregg/FlameGraph)
