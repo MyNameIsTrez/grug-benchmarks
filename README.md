@@ -30,7 +30,7 @@ Using FlameGraph, I got this output:
 
 What was slow here was the fact that every `on_` function call enabled and disabled runtime error handling (division by 0/stack overflow/functions taking too long).
 
-I decided to call this behavior "safe" mode, and I then modified the compiler so that it also generates a "fast" version of every `on_` function, which *does not* protect against mod runtime errors:
+I decided to call this behavior "safe" mode, and I then modified the compiler so that it also generates a "fast" version of every `on_` function. The "fast" mode *does not* protect against mod runtime errors:
 
 ![image](https://github.com/user-attachments/assets/2af7dc83-6bd8-4a3e-9829-d7f73d7acf7b)
 
