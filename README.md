@@ -30,15 +30,21 @@ Using FlameGraph, I got this output:
 
 What was slow here was the fact that every `on_` function call enabled and disabled signal runtime error handling (division by 0/stack overflow/etc.).
 
+Much later on I was able to optimize it down to this, by replacing signal handler usage with manual checks in the Assembly (like preventing division by 0, by checking if the divisor is 0 beforehand):
+
+![image](https://github.com/user-attachments/assets/92e56bfc-ee84-4eb9-b8d8-6a69485030ea)
+
+![image](https://github.com/user-attachments/assets/8770e144-5798-49ef-8eb4-33e1add59687)
+
 I decided to call this behavior "safe" mode, and I then modified the compiler so that it also generates a "fast" version of every `on_` function. The "fast" mode *does not* protect against mod runtime errors:
 
 ![image](https://github.com/user-attachments/assets/2af7dc83-6bd8-4a3e-9829-d7f73d7acf7b)
 
 After making the 1st and 2nd test do 1000x more iterations, and the 3rd test 100x more iterations:
 
-![image](https://github.com/user-attachments/assets/c6b2395a-bc01-428f-a362-bad596debbb0)
+![image](https://github.com/user-attachments/assets/008e5160-ed28-4b9d-947d-0fab21d96e03)
 
-![image](https://github.com/user-attachments/assets/f3ba3c4f-13b3-40bb-86bb-477fcec8be16)
+![image](https://github.com/user-attachments/assets/2224a3b1-df14-42e5-8efc-7cb812953767)
 
 Now that the `get_1()` and `increment()` calls are pretty much all the graph shows, there isn't much left to optimize (without writing an entire optimization pass for the generated machine code):
 
