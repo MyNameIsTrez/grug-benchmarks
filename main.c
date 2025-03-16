@@ -14,13 +14,11 @@
 typedef int32_t i32;
 
 struct human_on_fns {
-	void (*spawn)(void *globals);
 	void (*print)(void *globals);
 	void (*increment)(void *globals);
 };
 
 struct human {
-	i32 placeholder;
 	struct human_on_fns *on_fns;
 };
 
@@ -30,11 +28,6 @@ void game_fn_print_i32(i32 i) {
 
 i32 game_fn_get_1(void) {
 	return 1;
-}
-
-static struct human human_definition;
-void game_fn_set_human_placeholder(i32 placeholder) {
-	human_definition.placeholder = placeholder;
 }
 
 static double get_elapsed_seconds(struct timespec start, struct timespec end) {
@@ -87,10 +80,7 @@ void test_1B_not_cached(void) {
 	void *globals = malloc(file.globals_size);
 	file.init_globals_fn(globals, 0);
 
-	struct human_on_fns *on_fns = file.on_fns;
-	on_fns->spawn(globals);
-
-	struct human human = human_definition;
+	struct human human = {0};
 
 	human.on_fns = file.on_fns;
 
