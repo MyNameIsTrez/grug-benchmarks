@@ -28,7 +28,7 @@ Using FlameGraph, I got this output:
 
 ![image](https://github.com/user-attachments/assets/c1bba5af-9b11-4f13-bd2e-65a4fe42258a)
 
-What was slow here was the fact that every `on_` function call enabled and disabled runtime error handling (division by 0/stack overflow/functions taking too long).
+What was slow here was the fact that every `on_` function call enabled and disabled signal runtime error handling (division by 0/stack overflow/etc.).
 
 I decided to call this behavior "safe" mode, and I then modified the compiler so that it also generates a "fast" version of every `on_` function. The "fast" mode *does not* protect against mod runtime errors:
 
@@ -48,9 +48,9 @@ Now that the `get_1()` and `increment()` calls are pretty much all the graph sho
 
 #### Steps
 
-1. Clone [FlameGraph](https://github.com/brendangregg/FlameGraph)
-2. After you've generated `perf.data` using the earlier `perf record -g ./a.out`, run `sudo perf script -f > out.perf` to output the trace to `out.perf`
-3. Run `pwd` in your FlameGraph clone, add `export FLAMEGRAPH_PATH=<pwd path goes here>` to your `~/.bashrc`, and run `source ~/.bashrc` to apply the change to your current terminal session
-4. Run `$FLAMEGRAPH_PATH/stackcollapse-perf.pl out.perf > out.folded`
-5. Run `$FLAMEGRAPH_PATH/flamegraph.pl out.folded --width 2450 --fontsize 15 > kernel.svg`
+1. Clone [FlameGraph](https://github.com/brendangregg/FlameGraph).
+2. After you've generated `perf.data` using the earlier `perf record -g ./a.out`, run `sudo perf script -f > out.perf` to output the trace to `out.perf`.
+3. Run `pwd` in your FlameGraph clone, add `export FLAMEGRAPH_PATH=<pwd path goes here>` to your `~/.bashrc`, and run `source ~/.bashrc` to apply the change to your current terminal session.
+4. Run `$FLAMEGRAPH_PATH/stackcollapse-perf.pl out.perf > out.folded`.
+5. Run `$FLAMEGRAPH_PATH/flamegraph.pl out.folded --width 2450 --fontsize 15 > kernel.svg`.
 6. Drag the generated `kernel.svg` into your browser as a new tab. You're able to click the colored boxes to look at a subsection of the stack trace.
