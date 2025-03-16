@@ -1,43 +1,11 @@
 {
     "entities": {
-        "gun": {
-            "description": "A gun.",
-            "fields": [
-                {
-                    "name": "placeholder",
-                    "type": "i32"
-                }
-            ],
-            "on_functions": {
-                "on_print": {
-                    "description": "Called when the game asks this entity's global 'i' value to be printed.",
-                    "arguments": [
-                        {
-                            "name": "self",
-                            "type": "i32"
-                        }
-                    ]
-                },
-                "on_increment": {
-                    "description": "Called when the game asks this entity's global 'i' value to be incremented.",
-                    "arguments": [
-                        {
-                            "name": "self",
-                            "type": "i32"
-                        }
-                    ]
-                }
-            }
-        },
         "human": {
             "description": "A human.",
-            "fields": [
-                {
-                    "name": "placeholder",
-                    "type": "i32"
-                }
-            ],
             "on_functions": {
+				"on_spawn": {
+					"description": "Called when the entity is spawned."
+				},
                 "on_print": {
                     "description": "Called when the game asks this entity's global 'i' value to be printed.",
                     "arguments": [
@@ -60,6 +28,15 @@
         }
     },
     "game_functions": {
+        "set_human_placeholder": {
+            "description": "Sets the placeholder of the spawned human.",
+            "arguments": [
+                {
+                    "name": "placeholder",
+                    "type": "i32"
+                }
+            ]
+        },
         "print_i32": {
             "description": "Prints an i32.",
             "arguments": [

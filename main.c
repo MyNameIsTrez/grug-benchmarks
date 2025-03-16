@@ -13,16 +13,8 @@
 
 typedef int32_t i32;
 
-struct gun_on_fns {
-	void (*print)(void *globals);
-	void (*increment)(void *globals);
-};
-
-struct gun {
-	i32 placeholder;
-};
-
 struct human_on_fns {
+	void (*spawn)(void *globals);
 	void (*print)(void *globals);
 	void (*increment)(void *globals);
 };
@@ -40,18 +32,9 @@ i32 game_fn_get_1(void) {
 	return 1;
 }
 
-static struct gun gun_definition;
-void game_fn_define_gun(i32 placeholder) {
-	gun_definition = (struct gun){
-		.placeholder = placeholder,
-	};
-}
-
 static struct human human_definition;
-void game_fn_define_human(i32 placeholder) {
-	human_definition = (struct human){
-		.placeholder = placeholder,
-	};
+void game_fn_set_human_placeholder(i32 placeholder) {
+	human_definition.placeholder = placeholder;
 }
 
 static double get_elapsed_seconds(struct timespec start, struct timespec end) {
@@ -69,12 +52,12 @@ static struct grug_file get_grug_file(char *name) {
 
 void test_100M_dlsym(void) {
 	// Setup
-	struct grug_file file = get_grug_file("gun.grug");
+	struct grug_file file = get_grug_file("human-human.grug");
 
 	void *globals = malloc(file.globals_size);
 	file.init_globals_fn(globals, 0);
 
-	struct gun_on_fns *on_fns = file.on_fns;
+	struct human_on_fns *on_fns = file.on_fns;
 
 	// Running
 	on_fns->print(globals);
@@ -83,7 +66,7 @@ void test_100M_dlsym(void) {
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
 
 	for (size_t i = 0; i < 100000000; i++) {
-		struct gun_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
+		struct human_on_fns *on_fns_hot = dlsym(file.dll, "on_fns");
 		on_fns_hot->increment(globals);
 	}
 
@@ -99,12 +82,14 @@ void test_100M_dlsym(void) {
 
 void test_1B_not_cached(void) {
 	// Setup
-	struct grug_file file = get_grug_file("human.grug");
+	struct grug_file file = get_grug_file("human-human.grug");
 
 	void *globals = malloc(file.globals_size);
 	file.init_globals_fn(globals, 0);
 
-	file.define_fn();
+	struct human_on_fns *on_fns = file.on_fns;
+	on_fns->spawn(globals);
+
 	struct human human = human_definition;
 
 	human.on_fns = file.on_fns;
@@ -131,12 +116,12 @@ void test_1B_not_cached(void) {
 
 void test_1B_cached(void) {
 	// Setup
-	struct grug_file file = get_grug_file("gun.grug");
+	struct grug_file file = get_grug_file("human-human.grug");
 
 	void *globals = malloc(file.globals_size);
 	file.init_globals_fn(globals, 0);
 
-	struct gun_on_fns *on_fns = file.on_fns;
+	struct human_on_fns *on_fns = file.on_fns;
 
 	void (*increment)(void *globals) = on_fns->increment;
 	void (*print)(void *globals) = on_fns->print;
@@ -167,12 +152,15 @@ static void runtime_error_handler(char *reason, enum grug_runtime_error_type typ
 }
 
 int main(void) {
-	grug_init(runtime_error_handler, "mod_api.json", "mods");
+	if (grug_init(runtime_error_handler, "mod_api.json", "mods")) {
+		fprintf(stderr, "grug_init() error: %s (detected by grug.c:%d)\n", grug_error.msg, grug_error.grug_c_line_number);
+		exit(EXIT_FAILURE);
+	}
 
 	grug_set_on_fns_to_fast_mode();
 
 	if (grug_regenerate_modified_mods()) {
-		fprintf(stderr, "grug loading error: %s, in %s (detected in grug.c:%d)\n", grug_error.msg, grug_error.path, grug_error.grug_c_line_number);
+		fprintf(stderr, "grug loading error: %s, in %s (detected by grug.c:%d)\n", grug_error.msg, grug_error.path, grug_error.grug_c_line_number);
 		exit(EXIT_FAILURE);
 	}
 

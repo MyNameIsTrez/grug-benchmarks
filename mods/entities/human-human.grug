@@ -1,10 +1,8 @@
-define() gun {
-    return {
-        .placeholder = 0,
-    }
-}
-
 i: i32 = 0
+
+on_spawn() {
+    set_human_placeholder(0)
+}
 
 on_print(self: i32) {
     print_i32(i)
