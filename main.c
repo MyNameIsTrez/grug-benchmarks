@@ -169,7 +169,7 @@ static void runtime_error_handler(char *reason, enum grug_runtime_error_type typ
 int main(void) {
 	grug_init(runtime_error_handler, "mod_api.json", "mods");
 
-	// grug_set_on_fns_to_fast_mode();
+	grug_set_on_fns_to_fast_mode();
 
 	if (grug_regenerate_modified_mods()) {
 		fprintf(stderr, "grug loading error: %s, in %s (detected in grug.c:%d)\n", grug_error.msg, grug_error.path, grug_error.grug_c_line_number);
