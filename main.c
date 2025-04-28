@@ -142,7 +142,7 @@ static void runtime_error_handler(char *reason, enum grug_runtime_error_type typ
 }
 
 int main(void) {
-	if (grug_init(runtime_error_handler, "mod_api.json", "mods")) {
+	if (grug_init(runtime_error_handler, "mod_api.json", "mods", 10)) {
 		fprintf(stderr, "grug_init() error: %s (detected by grug.c:%d)\n", grug_error.msg, grug_error.grug_c_line_number);
 		exit(EXIT_FAILURE);
 	}
