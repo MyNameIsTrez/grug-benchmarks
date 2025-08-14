@@ -17,8 +17,10 @@
         "-I.",
         "-Igrug",
         "-rdynamic",
+        "-z",
+        "execstack",
         // "-fsanitize=address,undefined",
-        "-Ofast"
+        "-O3"
       ],
       "problemMatcher": [
         "$tsc"
@@ -44,8 +46,10 @@
         "-I.",
         "-Igrug",
         "-rdynamic",
+        "-z",
+        "execstack",
         // "-fsanitize=address,undefined",
-        "-Ofast"
+        "-O3"
       ],
       "problemMatcher": [
         "$tsc"
